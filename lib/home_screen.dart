@@ -13,8 +13,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final myLatLng = LatLng(40.801856, 263.346226);
+  final myLatLng = LatLng(35.163143, 129.117681);
+  bool isInside = false;
 
+  Circle blueCircle = Circle(
+      circleId: CircleId('my_circle'),
+      center: LatLng(35.163143, 129.117681),
+      fillColor: Colors.blue.withOpacity(0.5),
+      strokeColor: Colors.blue,
+      strokeWidth: 3,
+      radius: 3000);
+  Circle redCircle = Circle(
+      circleId: CircleId('my_circle'),
+      center: LatLng(35.163143, 129.117681),
+      fillColor: Colors.red.withOpacity(0.5),
+      strokeColor: Colors.red,
+      strokeWidth: 3,
+      radius: 3000);
+
+  Marker marker = const Marker(
+    markerId: MarkerId('my_marker'),
+    position: LatLng(35.163143, 129.117681),
+  );
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,12 +55,31 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 flex: 2,
-                child: GoogleMap(
-                    mapType: MapType.normal,
-                    myLocationEnabled: true,
-                    myLocationButtonEnabled: true,
-                    initialCameraPosition:
-                        CameraPosition(target: myLatLng, zoom: 10)),
+                child: StreamBuilder(
+                  stream: Geolocator.getPositionStream(),
+                  builder: (context, asyncData) {
+                    print('stream activated');
+                    if (!asyncData.hasData) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    bool isInside = Geolocator.distanceBetween(
+                            35.163143,
+                            129.117681,
+                            asyncData.data!.latitude,
+                            asyncData.data!.longitude) <
+                        3000;
+                    return GoogleMap(
+                        mapType: MapType.normal,
+                        myLocationEnabled: true,
+                        myLocationButtonEnabled: true,
+                        circles: {isInside ? blueCircle : redCircle},
+                        markers: {marker},
+                        initialCameraPosition:
+                            CameraPosition(target: myLatLng, zoom: 10));
+                  },
+                ),
               ),
               Expanded(flex: 1, child: Center(child: Text('출첵')))
             ],
@@ -52,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<Permission> checkPermission() async {
     logger.d('check permission');
-    final isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+    bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
     logger.d('isLocationEnabled : $isLocationEnabled');
     if (!isLocationEnabled) {
       return Permission.unAble;
