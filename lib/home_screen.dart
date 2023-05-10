@@ -65,10 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     }
                     bool isInside = Geolocator.distanceBetween(
-                            35.163143,
-                            129.117681,
-                            asyncData.data!.latitude,
-                            asyncData.data!.longitude) <
+                            35.163143, 129.117681, asyncData.data!.latitude, asyncData.data!.longitude) <
                         3000;
                     return GoogleMap(
                         mapType: MapType.normal,
@@ -76,8 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         myLocationButtonEnabled: true,
                         circles: {isInside ? blueCircle : redCircle},
                         markers: {marker},
-                        initialCameraPosition:
-                            CameraPosition(target: myLatLng, zoom: 10));
+                        initialCameraPosition: CameraPosition(target: myLatLng, zoom: 10));
                   },
                 ),
               ),
@@ -115,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return Permission.permitted;
     }
 
-    return Permission.denied;
+    return Permission.permitted;
   }
 
   AppBar buildAppBar() {
